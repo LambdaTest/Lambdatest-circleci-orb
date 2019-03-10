@@ -1,0 +1,65 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:7.10
+
+      # Specify service dependencies here if necessary
+
+    working_directory: ~/Nightwatch-circleci-selenium
+
+    steps:
+      - checkout
+      
+      - run: 
+          name: "Downloading tunnel binary"
+          command: |
+            wget https://s3.amazonaws.com/lambda-tunnel/LT_Linux.zip
+      
+      - run: 
+          name: "Extracting tunnel binary"
+          command: |
+            sudo apt-get install unzip
+            unzip LT_Linux.zip
+
+      - run: 
+          name: "Executing tunnel binary"
+          background: true
+          command: |
+            ./LT -user ${LAMBDATEST_EMAIL} -key ${LAMBDATEST_KEY}
+            sleep 40
+      
+      - run: 
+          name: "Setup custom environment variables"
+          command: |
+            echo 'export LT_USERNAME="${LAMBDATEST_USERNAME}"' >> $BASH_ENV
+
+      - run:
+          name: "Setup custom environment variables"
+          command: |
+            echo 'export LT_ACCESS_KEY="${LAMBDATEST_ACCESS_KEY}"' >> $BASH_ENV
+
+      - run: # test what branch we're on.
+          name: "Here is the LT_Username : "
+          command: echo ${LT_USERNAME}       
+
+      # Download and cache dependencies
+ #    - restore_cache:
+ #        keys:
+ #          - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+
+      - run: npm install
+
+#      - save_cache:
+#          paths:
+#            - node_modules
+#          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # run tests!
+      - run: node_modules/.bin/nightwatch -e chrome
