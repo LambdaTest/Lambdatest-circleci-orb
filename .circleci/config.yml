@@ -8,31 +8,29 @@ simple_test:
       version: 2.1
       orbs:
         lambda-dev: lambda-dev/dev-release-1@0.0.1
-      workflows:
-        basic_workflow:
-          jobs:
-            - lambda-dev/with_tunnel:
-                docker:
-                  - image: circleci/node:7.10
-                steps:
-                  - checkout
-                  
-                  - run: 
-                      name: "Setup custom environment variables"
-                      command: |
-                        echo 'export LT_USERNAME="deepakm"' >> $BASH_ENV
+      jobs:
+        - lambda-dev/with_tunnel:
+            docker:
+              - image: circleci/node:7.10
+            steps:
+              - checkout
+              
+              - run: 
+                  name: "Setup custom environment variables"
+                  command: |
+                    echo 'export LT_USERNAME="deepakm"' >> $BASH_ENV
 
-                  - run:
-                      name: "Setup custom environment variables"
-                      command: |
-                        echo 'export LT_ACCESS_KEY="gIUJGTZtydrnSbdGro6Hm0yOJDfFBJWGZQ8FdyPA1rv07ZxxQA"' >> $BASH_ENV
+              - run:
+                  name: "Setup custom environment variables"
+                  command: |
+                    echo 'export LT_ACCESS_KEY="gIUJGTZtydrnSbdGro6Hm0yOJDfFBJWGZQ8FdyPA1rv07ZxxQA"' >> $BASH_ENV
 
-                  - run: # test what branch we're on.
-                      name: "Here is the LT_Username : "
-                      command: echo ${LT_USERNAME}       
+              - run: # test what branch we're on.
+                  name: "Here is the LT_Username : "
+                  command: echo ${LT_USERNAME}       
 
-                  - run: 
-                      command: |
-                        cd ~/Nightwatch-circleci-selenium
-                        npm install
-                        node_modules/.bin/nightwatch -e chrome
+              - run: 
+                  command: |
+                    cd ~/Nightwatch-circleci-selenium
+                    npm install
+                    node_modules/.bin/nightwatch -e chrome
