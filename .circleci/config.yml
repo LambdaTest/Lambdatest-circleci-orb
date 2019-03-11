@@ -28,6 +28,5 @@ workflows:
 
                 - run: 
                     command: |
-                      cd ~/Nightwatch-circleci-selenium
                       npm install
                       node_modules/.bin/nightwatch -e chrome
