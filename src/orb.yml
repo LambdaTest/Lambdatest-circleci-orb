@@ -1,0 +1,55 @@
+version: 2.1
+description: >
+  Encapsulates interactions with Lambdatest tunnel
+
+commands:
+  install:
+    steps:
+      - run: 
+          name: "Downloading tunnel binary"
+          command: |
+            wget https://s3.amazonaws.com/lambda-tunnel/LT_Linux.zip
+      
+      - run: 
+          name: "Extracting tunnel binary"
+          command: |
+            sudo apt-get install unzip
+            unzip LT_Linux.zip
+    
+  open_tunnel:
+    steps:
+      - run: 
+          name: "Executing tunnel binary"
+          background: true
+          command: |
+            : ${LAMBDATEST_EMAIL:?"Required Env Variable - LAMBDATEST_EMAIL not found!"}
+            : ${LAMBDATEST_USERNAME:?"Required Env Variable - LAMBDATEST_USERNAME not found!"}
+            : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
+            ./LT -user ${LAMBDATEST_EMAIL} -key ${LAMBDATEST_KEY}
+            #wait for Lambda tunnel to be up
+            sleep 40
+  
+  close_tunnel:
+    steps:
+      - run:
+          name: Close Lambdatest Tunnel
+          command: killall LT
+   
+jobs:
+  with_tunnel:
+    description: Use Lambdatest Tunnel
+    parameters:
+      docker:
+        type: string
+        default: "circleci/node:7.10"
+      steps:
+        type: steps
+        description: Steps to execute once the Lambdatest Tunnel is available
+    docker: 
+      - image: <<parameters.docker>>
+    steps:
+      - checkout
+      - install
+      - open_tunnel
+      - steps: << parameters.steps >>
+      - close_tunnel
