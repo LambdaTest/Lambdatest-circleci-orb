@@ -1,12 +1,13 @@
 version: 2.1
 
 orbs:
-    lambda-dev: lambda-dev/lambda-tunnel@0.0.2
+    lambda-dev: lambdatest/lambda-tunnel@volatile
 
 workflows:      
     basic_workflow:
         jobs:
-          - lambda-dev/with_tunnel:
+          - lambdatest/with_tunnel:
+              tunnel_name: "chrome"
               steps:
                 - run: 
                     command: |

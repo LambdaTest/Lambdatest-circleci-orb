@@ -12,11 +12,18 @@ commands:
       
       - run: 
           name: "Extracting tunnel binary"
+          description: "Installing dependencies - unzip, wget and ucommon-utils"
           command: |
-            sudo apt-get install unzip
+            sudo apt-get update && sudo apt-get install -y wget unzip ucommon-utils
+            if [ "$(md5sum LT_Linux.zip | awk '{print $1}')" == "0279d9a29b2346e90ba237fc5b12d254" ]; then  echo "match";  else echo "Lambda tunnel binary has corrupted. Please rerun this workflow."; exit 1; fi 
             unzip LT_Linux.zip
     
   open_tunnel:
+    parameters:
+      tunnel_name:
+        description: This feature will help you use the available tunnels from the selected head account which is the main account for performing parallel tunnel testing. While using this feature you are required to select both tunnel name and head tunnel.
+        type: string
+        default: ""
     steps:
       - run: 
           name: "Executing tunnel binary"
@@ -25,7 +32,7 @@ commands:
             : ${LAMBDATEST_EMAIL:?"Required Env Variable - LAMBDATEST_EMAIL not found!"}
             : ${LAMBDATEST_USERNAME:?"Required Env Variable - LAMBDATEST_USERNAME not found!"}
             : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
-            ./LT -user ${LAMBDATEST_EMAIL} -key ${LAMBDATEST_KEY}
+            ./LT -user ${LAMBDATEST_EMAIL} -key ${LAMBDATEST_KEY} <<# parameters.tunnel_name >> -tunnelName <<parameters.tunnel_name>> <</ parameters.tunnel_name>>
             #wait for Lambda tunnel to be up
             sleep 40
   
@@ -41,7 +48,11 @@ jobs:
     parameters:
       docker:
         type: string
-        default: "circleci/node:7.10"
+        default: "circleci/node:8.9.4"
+      tunnel_name:
+        description: Name your lambda tunnel and make sure to use this tunnel_name desired capability in your test
+        type: string
+        default: ""
       steps:
         type: steps
         description: Steps to execute once the Lambdatest Tunnel is available
@@ -50,6 +61,7 @@ jobs:
     steps:
       - checkout
       - install
-      - open_tunnel
+      - open_tunnel:
+          tunnel_name: <<parameters.tunnel_name>>
       - steps: << parameters.steps >>
       - close_tunnel
