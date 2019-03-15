@@ -1,8 +1,9 @@
-## NightWatch-circleCI-ORB-Sample
+## NightWatch-CircleCI-ORB-Sample
 ##### [NightWatch Documentation](http://nightwatchjs.org/)
 ![LAMBDATEST Logo](http://labs.lambdatest.com/images/fills-copy.svg)
-
-
+----
+This is sample repository for CircleCI ORBS.
+----
 ### Environment Setup
 
 1. Global Dependencies
@@ -38,6 +39,37 @@
 
 You will see the test result in the [lambdatest Dashboard](https://automation.lambdatest.com)
 
+## Circle CI ORB Config.
+---
+```
+version: 2.1
+
+orbs:
+    lambda-dev: lambdatest/lambda-tunnel@volatile
+
+workflows:      
+    basic_workflow:
+        jobs:
+          - lambdatest/with_tunnel:
+              name: "Chrome test"
+              tunnel_name: "chrome"
+              steps:
+                - run: 
+                    command: |
+                      npm install
+                      node_modules/.bin/nightwatch -e chrome
+          - lambdatest/with_tunnel:
+              name: "Firefox test"
+              tunnel_name: "firefox"
+              steps:
+                - run: 
+                    command: |
+                      npm install
+                      node_modules/.bin/nightwatch -e firefox
+
+```
+----
 ### Resources
 
 ##### [SeleniumHQ Documentation](http://www.seleniumhq.org/docs/)
+
