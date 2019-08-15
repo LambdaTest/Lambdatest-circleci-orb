@@ -1,6 +1,8 @@
 version: 2.1
 description: >
-  Encapsulates interactions with Lambdatest tunnel
+  Encapsulates interactions with Lambdatest tunnel.
+  Website: https://www.lambdatest.com/
+  Repo: https://github.com/LambdaTest/Lambdatest-circleci-orb
 
 commands:
   install:
