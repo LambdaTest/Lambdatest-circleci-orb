@@ -1,4 +1,4 @@
-## NightWatch-CircleCI-ORB-Sample
+## NightWatch CircleCI ORB Sample
 ##### [NightWatch Documentation](http://nightwatchjs.org/)
 ![LAMBDATEST Logo](http://labs.lambdatest.com/images/fills-copy.svg)
 ----
