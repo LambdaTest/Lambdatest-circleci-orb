@@ -39,10 +39,10 @@
 
       "desiredCapabilities": {
         "build":"Nightwatch-Selenium-Sample",
-        "visual":true,
+        "visual":false,
         "video":true,
-        "console":true,
-        "network":true,
+        "console":false,
+        "network":false,
         "tunnel":true
       }
     },
