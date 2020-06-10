@@ -56,10 +56,10 @@ commands:
             : ${LAMBDATEST_EMAIL:?"Required Env Variable - LAMBDATEST_EMAIL not found!"}
             : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
             read LOWERPORT UPPERPORT < /proc/sys/net/ipv4/ip_local_port_range
-            while :
-            do
-                PORT="`shuf -i $LOWERPORT-$UPPERPORT -n 1`"
+            PORT=$LOWERPORT
+            while [  $PORT -lt UPPERPORT ]; do
                 ss -lpn | grep -q ":$PORT " || break
+                let PORT=PORT+1 
             done
             echo "$PORT" > /tmp/port
             ./LT --user ${LAMBDATEST_EMAIL} --key ${LAMBDATEST_KEY} --controller circleci --infoAPIPort $PORT \
