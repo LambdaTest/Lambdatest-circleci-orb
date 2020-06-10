@@ -57,7 +57,7 @@ commands:
             : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
             read LOWERPORT UPPERPORT < /proc/sys/net/ipv4/ip_local_port_range
             PORT=$LOWERPORT
-            while [  $PORT -lt UPPERPORT ]; do
+            while [  $PORT -lt $UPPERPORT ]; do
                 ss -lpn | grep -q ":$PORT " || break
                 let PORT=PORT+1 
             done
@@ -73,13 +73,14 @@ commands:
             <</ parameters.proxy_user>>
             <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
             <</ parameters.proxy_pass>>
-            <<# parameters.shared_tunnel >> --shared-tunnel <</ parameters.shared_tunnel>>  
-
+            <<# parameters.shared_tunnel >> --shared-tunnel \ <</ parameters.shared_tunnel>>
+            /
   wait_tunnel:
     steps:
       - run:
           name: Wait for LambdaTest Tunnel
           command: |
+            while [ ! -f /tmp/port ]; do sleep 1; done
             PORT=$(head -1 /tmp/port)
             curl --silent --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
 
