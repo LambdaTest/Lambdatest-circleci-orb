@@ -1,6 +1,6 @@
 version: 2.1
 description: >
-  Encapsulates interactions with Lambdatest tunnel.
+  Encapsulates interactions with LambdaTest tunnel.
 display:
   home_url: https://www.lambdatest.com/
   source_url: https://github.com/LambdaTest/Lambdatest-circleci-orb
@@ -11,20 +11,41 @@ commands:
       - run: 
           name: "Downloading tunnel binary"
           command: |
-            wget http://downloads.lambdatest.com/tunnel/linux/64bit/LT_Linux.zip
+            sudo apt-get update && sudo apt-get install -y curl unzip ucommon-utils psmisc
+            curl -O https://downloads.lambdatest.com/tunnel/linux/64bit/ltcomponent.zip
       
       - run: 
           name: "Extracting tunnel binary"
-          description: "Installing dependencies - unzip, wget and ucommon-utils"
           command: |
-            sudo apt-get update && sudo apt-get install -y wget unzip ucommon-utils
-            if [ "$(md5sum LT_Linux.zip | awk '{print $1}')" == "0279d9a29b2346e90ba237fc5b12d254" ]; then  echo "match";  else echo "Lambda tunnel binary has corrupted. Please rerun this workflow."; exit 1; fi 
-            unzip LT_Linux.zip
-    
+            unzip ltcomponent.zip
+            mv ltcomponent LT
+            chmod +x LT
+            rm ltcomponent.zip
+
   open_tunnel:
     parameters:
       tunnel_name:
         description: This feature will help you use the available tunnels from the selected head account which is the main account for performing parallel tunnel testing. While using this feature you are required to select both tunnel name and head tunnel.
+        type: string
+        default: ""
+      shared_tunnel:
+        description: Sharing tunnel among team members <<Optional>>
+        type: boolean
+        default: false
+      proxy_host:
+        description: Specify Proxy Host <<Optional>>
+        type: string
+        default: ""
+      proxy_port:
+        description: Specify Proxy Port <<Optional>>
+        type: string
+        default: ""
+      proxy_user:
+        description: Specify Proxy Username <<Optional>>
+        type: string
+        default: ""
+      proxy_pass:
+        description: Specify Proxy Password <<Optional>>
         type: string
         default: ""
     steps:
@@ -33,32 +54,80 @@ commands:
           background: true
           command: |
             : ${LAMBDATEST_EMAIL:?"Required Env Variable - LAMBDATEST_EMAIL not found!"}
-            : ${LAMBDATEST_USERNAME:?"Required Env Variable - LAMBDATEST_USERNAME not found!"}
             : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
-            ./LT -user ${LAMBDATEST_EMAIL} -key ${LAMBDATEST_KEY} <<# parameters.tunnel_name >> -tunnelName <<parameters.tunnel_name>> <</ parameters.tunnel_name>>
-            #wait for Lambda tunnel to be up
-            sleep 40
-  
+            read LOWERPORT UPPERPORT < /proc/sys/net/ipv4/ip_local_port_range
+            while :
+            do
+                PORT="`shuf -i $LOWERPORT-$UPPERPORT -n 1`"
+                ss -lpn | grep -q ":$PORT " || break
+            done
+            echo "$PORT" > /tmp/port
+            ./LT --user ${LAMBDATEST_EMAIL} --key ${LAMBDATEST_KEY} --controller circleci --infoAPIPort $PORT \
+            <<# parameters.tunnel_name >> --tunnelName <<parameters.tunnel_name>> \
+            <</ parameters.tunnel_name>>
+            <<# parameters.proxy_host >> --proxy-host <<parameters.proxy_host>> \
+            <</ parameters.proxy_host>>
+            <<# parameters.proxy_port >> --proxy-port <<parameters.proxy_port>> \
+            <</ parameters.proxy_port>>
+            <<# parameters.proxy_user >> --proxy-user <<parameters.proxy_user>> \
+            <</ parameters.proxy_user>>
+            <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
+            <</ parameters.proxy_pass>>
+            <<# parameters.shared_tunnel >> --shared-tunnel <</ parameters.shared_tunnel>>  
+
+  wait_tunnel:
+    steps:
+      - run:
+          name: Wait for LambdaTest Tunnel
+          command: |
+            PORT=$(head -1 /tmp/port)
+            curl --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
+
   close_tunnel:
     steps:
       - run:
-          name: Close Lambdatest Tunnel
-          command: killall LT
-   
+          name: Close LambdaTest Tunnel
+          command: |
+            PORT=$(head -1 /tmp/port)
+            status_code=$(curl --request DELETE --write-out %{http_code} --silent --output /dev/null http://127.0.0.1:$PORT/api/v1.0/stop)
+            if [[ "$status_code" -ne 200 ]] ; then
+              killall LT
+            fi
+            rm /tmp/port
 jobs:
   with_tunnel:
-    description: Use Lambdatest Tunnel
+    description: Start LambdaTest Tunnel
     parameters:
       docker:
         type: string
         default: "circleci/node:8.9.4"
       tunnel_name:
-        description: Name your lambda tunnel and make sure to use this tunnel_name desired capability in your test
+        description: Name your lambda tunnel and make sure to use this tunnel_name desired capability in your test <<Optional>>
+        type: string
+        default: ""
+      shared_tunnel:
+        description: Sharing tunnel among team members <<Optional>>
+        type: boolean
+        default: false
+      proxy_host:
+        description: Specify Proxy Host <<Optional>>
+        type: string
+        default: ""
+      proxy_port:
+        description: Specify Proxy Port <<Optional>>
+        type: string
+        default: ""
+      proxy_user:
+        description: Specify Proxy Username <<Optional>>
+        type: string
+        default: ""
+      proxy_pass:
+        description: Specify Proxy Password <<Optional>>
         type: string
         default: ""
       steps:
         type: steps
-        description: Steps to execute once the Lambdatest Tunnel is available
+        description: Steps to execute once the LambdaTest Tunnel is available
     docker: 
       - image: <<parameters.docker>>
     steps:
@@ -66,5 +135,11 @@ jobs:
       - install
       - open_tunnel:
           tunnel_name: <<parameters.tunnel_name>>
+          shared_tunnel: <<parameters.shared_tunnel>>
+          proxy_host: <<parameters.proxy_host>>
+          proxy_port: <<parameters.proxy_port>>
+          proxy_user: <<parameters.proxy_user>>
+          proxy_pass: <<parameters.proxy_pass>>
+      - wait_tunnel
       - steps: << parameters.steps >>
       - close_tunnel
