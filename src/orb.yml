@@ -81,7 +81,7 @@ commands:
           name: Wait for LambdaTest Tunnel
           command: |
             PORT=$(head -1 /tmp/port)
-            curl --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
+            curl --silent --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
 
   close_tunnel:
     steps:
