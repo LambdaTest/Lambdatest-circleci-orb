@@ -168,3 +168,57 @@ jobs:
       - wait_tunnel
       - steps: << parameters.steps >>
       - close_tunnel
+
+examples:
+  sample_test:
+    description: Open lambdatest tunnel and run sample nightwatchjs test
+    usage:
+      version: 2.1
+      orbs:
+        lambda-tunnel: lambdatest/lambda-tunnel@volatile
+      workflows:
+        browser_test:
+          jobs:
+            - lambdatest/with_tunnel:
+                tunnel_name: "chrome"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=<<parameters.lambdatest_key>> 
+                        node_modules/.bin/nightwatch -e chrome
+    
+  parallel_tests:
+    description: Open lambdatest tunnel and run sample nightwatchjs test in parallel
+    usage:
+      version: 2.1
+      orbs:
+        lambda-tunnel: lambdatest/lambda-tunnel@volatile
+      workflows:
+        browser_tests:
+          jobs:
+            - lambdatest/with_tunnel:
+                name: "Chrome test"
+                tunnel_name: "chrome"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        node_modules/.bin/nightwatch -e chrome
+
+            - lambdatest/with_tunnel:
+                name: "Firefox test"
+                tunnel_name: "firefox"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        node_modules/.bin/nightwatch -e firefox
