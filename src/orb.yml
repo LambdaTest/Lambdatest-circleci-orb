@@ -1,68 +1,79 @@
 version: 2.1
-description: >
-  Encapsulates interactions with LambdaTest tunnel.
+description: |
+      Seamlessly integrate Lambda Tunnel with CircleCI pipelines and 
+      run Selenium tests on 2000+ browsers for your locally hosted or 
+      privately hosted pages with LambdaTest Selenium Grid.
 display:
   home_url: https://www.lambdatest.com/
   source_url: https://github.com/LambdaTest/Lambdatest-circleci-orb
 
 commands:
   install:
+    description: |
+      Launches the tunnel binary in background
     steps:
       - run: 
-          name: "Downloading tunnel binary"
+          name: "Download and Extract tunnel binary"
           command: |
-            sudo apt-get update && sudo apt-get install -y curl unzip ucommon-utils psmisc
+            sudo apt-get update && sudo apt-get install -y curl unzip iproute2 psmisc
             curl -O https://downloads.lambdatest.com/tunnel/linux/64bit/ltcomponent.zip
-      
-      - run: 
-          name: "Extracting tunnel binary"
-          command: |
             unzip ltcomponent.zip
             mv ltcomponent LT
             chmod +x LT
             rm ltcomponent.zip
 
   open_tunnel:
+    description: |
+        Launches the tunnel binary in background
     parameters:
+      lambdatest_email:
+        description: Specify your LambdaTest email
+        type: string
+      lambdatest_key:
+         description: Specify your LambdaTest Access Key
+         type: env_var_name
+         default: LAMBDATEST_KEY
       tunnel_name:
-        description: This feature will help you use the available tunnels from the selected head account which is the main account for performing parallel tunnel testing. While using this feature you are required to select both tunnel name and head tunnel.
+        description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
         type: string
         default: ""
       shared_tunnel:
-        description: Sharing tunnel among team members <<Optional>>
+        description: Sharing tunnel among team members
         type: boolean
         default: false
       proxy_host:
-        description: Specify Proxy Host <<Optional>>
+        description: You may specify a proxy host if connecting tunnel via proxy
         type: string
         default: ""
       proxy_port:
-        description: Specify Proxy Port <<Optional>>
+        description: You may specify a proxy port if connecting tunnel via proxy
         type: string
         default: ""
       proxy_user:
-        description: Specify Proxy Username <<Optional>>
+        description: You may specify a proxy username if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
       proxy_pass:
-        description: Specify Proxy Password <<Optional>>
+        description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
     steps:
       - run: 
-          name: "Executing tunnel binary"
+          name: "Executing the tunnel binary"
           background: true
           command: |
-            : ${LAMBDATEST_EMAIL:?"Required Env Variable - LAMBDATEST_EMAIL not found!"}
-            : ${LAMBDATEST_KEY:?"Required Env Variable - LAMBDATEST_KEY not found!"}
+            if [ -z "$<<parameters.lambdatest_key>>" ]; then
+              echo "Error: The parameter lambdatest_key is empty. Please ensure the environment variable LAMBDATEST_KEY has been added."
+              exit 1
+            fi
             read LOWERPORT UPPERPORT < /proc/sys/net/ipv4/ip_local_port_range
             PORT=$LOWERPORT
-            while [  $PORT -lt UPPERPORT ]; do
+            while [  $PORT -lt $UPPERPORT ]; do
                 ss -lpn | grep -q ":$PORT " || break
                 let PORT=PORT+1 
             done
             echo "$PORT" > /tmp/port
-            ./LT --user ${LAMBDATEST_EMAIL} --key ${LAMBDATEST_KEY} --controller circleci --infoAPIPort $PORT \
+            ./LT --user <<parameters.lambdatest_email>> --key ${<<parameters.lambdatest_key>>} --controller circleci --infoAPIPort $PORT \
             <<# parameters.tunnel_name >> --tunnelName <<parameters.tunnel_name>> \
             <</ parameters.tunnel_name>>
             <<# parameters.proxy_host >> --proxy-host <<parameters.proxy_host>> \
@@ -73,17 +84,22 @@ commands:
             <</ parameters.proxy_user>>
             <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
             <</ parameters.proxy_pass>>
-            <<# parameters.shared_tunnel >> --shared-tunnel <</ parameters.shared_tunnel>>  
-
+            <<# parameters.shared_tunnel >> --shared-tunnel \ <</ parameters.shared_tunnel>>
+            /
   wait_tunnel:
+    description: |
+      Waits for the tunnel connection to be established with the tunnel server
     steps:
       - run:
           name: Wait for LambdaTest Tunnel
           command: |
+            while [ ! -f /tmp/port ]; do sleep 0.5; done
             PORT=$(head -1 /tmp/port)
-            curl --silent --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
+            curl  --silent --retry-connrefused --connect-timeout 5 --max-time 5 --retry 30 --retry-delay 2 --retry-max-time 60 http://127.0.0.1:$PORT/api/v1.0/info 2>&1 > /dev/null
 
   close_tunnel:
+    description: |
+      Quitting the tunnel after test suite has been run
     steps:
       - run:
           name: Close LambdaTest Tunnel
@@ -96,33 +112,40 @@ commands:
             rm /tmp/port
 jobs:
   with_tunnel:
-    description: Start LambdaTest Tunnel
+    description: Job to run LambdaTest tunnel for testing locally or privately hosted web apps
     parameters:
       docker:
         type: string
-        default: "circleci/node:8.9.4"
+        default: "cimg/node:current"
+      lambdatest_email:
+        description: Specify your LambdaTest email
+        type: string
+      lambdatest_key:
+         description: Specify your LambdaTest Access Key
+         type: env_var_name
+         default: LAMBDATEST_KEY
       tunnel_name:
-        description: Name your lambda tunnel and make sure to use this tunnel_name desired capability in your test <<Optional>>
+        description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
         type: string
         default: ""
       shared_tunnel:
-        description: Sharing tunnel among team members <<Optional>>
+        description: Sharing tunnel among team members
         type: boolean
         default: false
       proxy_host:
-        description: Specify Proxy Host <<Optional>>
+        description: You may specify a proxy host if connecting tunnel via proxy
         type: string
         default: ""
       proxy_port:
-        description: Specify Proxy Port <<Optional>>
+        description: You may specify a proxy port if connecting tunnel via proxy
         type: string
         default: ""
       proxy_user:
-        description: Specify Proxy Username <<Optional>>
+        description: You may specify a proxy username if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
       proxy_pass:
-        description: Specify Proxy Password <<Optional>>
+        description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
       steps:
@@ -134,6 +157,8 @@ jobs:
       - checkout
       - install
       - open_tunnel:
+          lambdatest_email: <<parameters.lambdatest_email>>
+          lambdatest_key: <<parameters.lambdatest_key>>
           tunnel_name: <<parameters.tunnel_name>>
           shared_tunnel: <<parameters.shared_tunnel>>
           proxy_host: <<parameters.proxy_host>>
@@ -143,3 +168,57 @@ jobs:
       - wait_tunnel
       - steps: << parameters.steps >>
       - close_tunnel
+
+examples:
+  sample_test:
+    description: Open lambdatest tunnel and run sample nightwatchjs test
+    usage:
+      version: 2.1
+      orbs:
+        lambda-tunnel: lambdatest/lambda-tunnel@volatile
+      workflows:
+        browser_test:
+          jobs:
+            - lambdatest/with_tunnel:
+                tunnel_name: "chrome"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=<<parameters.lambdatest_key>> 
+                        node_modules/.bin/nightwatch -e chrome
+    
+  parallel_tests:
+    description: Open lambdatest tunnel and run sample nightwatchjs test in parallel
+    usage:
+      version: 2.1
+      orbs:
+        lambda-tunnel: lambdatest/lambda-tunnel@volatile
+      workflows:
+        browser_tests:
+          jobs:
+            - lambdatest/with_tunnel:
+                name: "Chrome test"
+                tunnel_name: "chrome"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        node_modules/.bin/nightwatch -e chrome
+
+            - lambdatest/with_tunnel:
+                name: "Firefox test"
+                tunnel_name: "firefox"
+                lambdatest_email: "user@lambdatest.com"
+                steps:
+                  - run: 
+                      command: |
+                        npm install
+                        export LT_USERNAME=<<parameters.lambdatest_email>>
+                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        node_modules/.bin/nightwatch -e firefox
