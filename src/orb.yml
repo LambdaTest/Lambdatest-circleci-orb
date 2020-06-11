@@ -10,7 +10,7 @@ display:
 commands:
   install:
     description: |
-      Launches the tunnel binary in background
+      Install and setup tunnel binary
     steps:
       - run: 
           name: "Download and Extract tunnel binary"
@@ -30,7 +30,7 @@ commands:
         description: Specify your LambdaTest email
         type: string
       lambdatest_key:
-         description: Specify your LambdaTest Access Key
+         description: Specify environment var holding LambdaTest Access Key
          type: env_var_name
          default: LAMBDATEST_KEY
       tunnel_name:
@@ -121,7 +121,7 @@ jobs:
         description: Specify your LambdaTest email
         type: string
       lambdatest_key:
-         description: Specify your LambdaTest Access Key
+         description: Specify environment var holding LambdaTest Access Key
          type: env_var_name
          default: LAMBDATEST_KEY
       tunnel_name:

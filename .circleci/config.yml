@@ -1,0 +1,15 @@
+version: 2.1
+
+orbs:
+  orb-tools: circleci/orb-tools@9.1.0
+
+workflows:
+  publish:
+    jobs:
+      - orb-tools/increment:
+          orb-path: src/orb.yml
+          orb-ref: lambdatest/lambda-tunnel
+          validate: true
+          checkout: true
+          publish-token-variable: ORB_PUBLISHING_TOKEN
+          
