@@ -36,7 +36,6 @@ commands:
       tunnel_name:
         description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
         type: string
-        default: ""
       shared_tunnel:
         description: Sharing tunnel among team members
         type: boolean
@@ -127,7 +126,6 @@ jobs:
       tunnel_name:
         description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
         type: string
-        default: ""
       shared_tunnel:
         description: Sharing tunnel among team members
         type: boolean
