@@ -184,8 +184,7 @@ examples:
                   - run: 
                       command: |
                         npm install
-                        export LT_USERNAME=<<parameters.lambdatest_email>>
-                        export LT_ACCESS_KEY=<<parameters.lambdatest_key>> 
+                        export LAMBDATEST_USERNAME=user
                         node_modules/.bin/nightwatch -e chrome
     
   parallel_tests:
@@ -205,8 +204,7 @@ examples:
                   - run: 
                       command: |
                         npm install
-                        export LT_USERNAME=<<parameters.lambdatest_email>>
-                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        export LAMBDATEST_USERNAME=user
                         node_modules/.bin/nightwatch -e chrome
 
             - lambdatest/with_tunnel:
@@ -217,6 +215,5 @@ examples:
                   - run: 
                       command: |
                         npm install
-                        export LT_USERNAME=<<parameters.lambdatest_email>>
-                        export LT_ACCESS_KEY=$LAMBDATEST_KEY
+                        export LAMBDATEST_USERNAME=user
                         node_modules/.bin/nightwatch -e firefox
