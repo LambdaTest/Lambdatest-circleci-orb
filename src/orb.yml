@@ -87,8 +87,10 @@ commands:
             <</ parameters.proxy_user>>
             <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
             <</ parameters.proxy_pass>>
-            <<# parameters.shared_tunnel >> --shared-tunnel \ <</ parameters.shared_tunnel>>
-            <<# parameters.verbose >> -v \ <</ parameters.verbose>>
+            <<# parameters.shared_tunnel >> --shared-tunnel \
+            <</ parameters.shared_tunnel>>
+            <<# parameters.verbose >> --v \
+            <</ parameters.verbose>>
             /
   wait_tunnel:
     description: |
