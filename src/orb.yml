@@ -56,6 +56,10 @@ commands:
         description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
+      verbose:
+        description: Enable verbose logging.
+        type: boolean
+        default: false
     steps:
       - run: 
           name: "Executing the tunnel binary"
@@ -84,6 +88,7 @@ commands:
             <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
             <</ parameters.proxy_pass>>
             <<# parameters.shared_tunnel >> --shared-tunnel \ <</ parameters.shared_tunnel>>
+            <<# parameters.verbose >> -v \ <</ parameters.verbose>>
             /
   wait_tunnel:
     description: |
@@ -146,6 +151,10 @@ jobs:
         description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
+      verbose:
+        description: Enable verbose logging
+        type: boolean
+        default: false
       steps:
         type: steps
         description: Steps to execute once the LambdaTest Tunnel is available
@@ -163,6 +172,7 @@ jobs:
           proxy_port: <<parameters.proxy_port>>
           proxy_user: <<parameters.proxy_user>>
           proxy_pass: <<parameters.proxy_pass>>
+          verbose: <<parameters.verbose>>
       - wait_tunnel
       - steps: << parameters.steps >>
       - close_tunnel
