@@ -1,12 +1,12 @@
 version: 2.1
 
 orbs:
-    lambda-dev: lambdatest/lambda-tunnel@volatile
+    lambda-tunnel: lambdatest/lambda-tunnel@volatile
 
 workflows:      
     basic_workflow:
         jobs:
-          - lambdatest/with_tunnel:
+          - lambda-tunnel/with_tunnel:
               name: "Chrome test"
               tunnel_name: "chrome"
               steps:
@@ -15,7 +15,7 @@ workflows:
                       npm install
                       node_modules/.bin/nightwatch -e chrome
 
-          - lambdatest/with_tunnel:
+          - lambda-tunnel/with_tunnel:
               name: "Firefox test"
               tunnel_name: "firefox"
               steps:
