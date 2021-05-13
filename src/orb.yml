@@ -16,11 +16,10 @@ commands:
           name: "Download and Extract tunnel binary"
           command: |
             sudo apt-get update && sudo apt-get install -y curl unzip iproute2 psmisc
-            curl -O https://downloads.lambdatest.com/tunnel/linux/64bit/ltcomponent.zip
-            unzip ltcomponent.zip
-            mv ltcomponent LT
+            curl -O https://downloads.lambdatest.com/tunnel/v3/linux/64bit/LT_Linux.zip
+            unzip LT_Linux.zip
+            rm LT_Linux.zip
             chmod +x LT
-            rm ltcomponent.zip
 
   open_tunnel:
     description: |
@@ -40,6 +39,14 @@ commands:
         description: Sharing tunnel among team members
         type: boolean
         default: false
+      mitm:
+        description: Run tunnel in man-in-the-middle mode
+        type: boolean
+        default: false
+      load_balanced:
+        description: Run tunnel in load balanced mode
+        type: boolean
+        default: false
       proxy_host:
         description: You may specify a proxy host if connecting tunnel via proxy
         type: string
@@ -56,6 +63,18 @@ commands:
         description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
+      no_proxy:
+        description: Comma separated list of hosts to bypass proxy when using tunnel
+        type: string
+        default: ""
+      egress_only:
+        description: Uses proxy settings only for outbound requests
+        type: boolean
+        default: false
+      ingress_only:
+        description: Uses proxy settings only for inbound requests
+        type: boolean
+        default: false
       verbose:
         description: Enable verbose logging.
         type: boolean
@@ -87,9 +106,19 @@ commands:
             <</ parameters.proxy_user>>
             <<# parameters.proxy_pass >> --proxy-pass <<parameters.proxy_pass>> \
             <</ parameters.proxy_pass>>
+            <<# parameters.no_proxy >> --no-proxy <<parameters.no_proxy>> \
+            <</ parameters.no_proxy>>
+            <<# parameters.egress_only >> --egress-only \
+            <</ parameters.egress_only>>
+            <<# parameters.ingress_only >> --ingress-only \
+            <</ parameters.ingress_only>>
             <<# parameters.shared_tunnel >> --shared-tunnel \
             <</ parameters.shared_tunnel>>
-            <<# parameters.verbose >> --v \
+            <<# parameters.mitm >> --mitm \
+            <</ parameters.mitm>>
+            <<# parameters.load_balanced >> -l \
+            <</ parameters.load_balanced>>
+            <<# parameters.verbose >> -v \
             <</ parameters.verbose>>
             /
   wait_tunnel:
@@ -137,6 +166,14 @@ jobs:
         description: Sharing tunnel among team members
         type: boolean
         default: false
+      mitm:
+        description: Run tunnel in man-in-the-middle mode
+        type: boolean
+        default: false
+      load_balanced:
+        description: Run tunnel in load balanced mode
+        type: boolean
+        default: false
       proxy_host:
         description: You may specify a proxy host if connecting tunnel via proxy
         type: string
@@ -153,6 +190,18 @@ jobs:
         description: You may specify a proxy password if connecting tunnel via proxy that has authentication enabled
         type: string
         default: ""
+      no_proxy:
+        description: Comma separated list of hosts to bypass proxy when using tunnel
+        type: string
+        default: ""
+      egress_only:
+        description: Uses proxy settings only for outbound requests
+        type: boolean
+        default: false
+      ingress_only:
+        description: Uses proxy settings only for inbound requests
+        type: boolean
+        default: false
       verbose:
         description: Enable verbose logging
         type: boolean
@@ -170,10 +219,15 @@ jobs:
           lambdatest_key: <<parameters.lambdatest_key>>
           tunnel_name: <<parameters.tunnel_name>>
           shared_tunnel: <<parameters.shared_tunnel>>
+          mitm: <<parameters.mitm>>
+          load_balanced: <<parameters.load_balanced>>
           proxy_host: <<parameters.proxy_host>>
           proxy_port: <<parameters.proxy_port>>
           proxy_user: <<parameters.proxy_user>>
           proxy_pass: <<parameters.proxy_pass>>
+          no_proxy: <<parameters.no_proxy>>
+          egress_only: <<parameters.egress_only>>
+          ingress_only: <<parameters.ingress_only>>
           verbose: <<parameters.verbose>>
       - wait_tunnel
       - steps: << parameters.steps >>
