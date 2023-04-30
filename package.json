@@ -7,6 +7,6 @@
     "test": "./node_modules/.bin/nightwatch -e chrome,firefox,edge,safari tests"
   },
   "devDependencies": {
-    "nightwatch": "^1.0.18"
+    "nightwatch": "^1.7.13"
   }
 }
