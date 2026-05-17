@@ -1,4 +1,4 @@
-# Run NightWatch with CircleCI ORB on TestMu AI (Formerly LambdaTest)
+﻿# Run NightWatch with CircleCI ORB on TestMu AI (Formerly LambdaTest)
 
 <p align="center">
   <a href="https://www.testmuai.com/"><img src="https://img.shields.io/badge/MADE%20BY%20TestMu%20AI-000000.svg?style=for-the-badge&labelColor=000" alt="Made by TestMu AI"></a>
@@ -17,9 +17,9 @@ With TestMu AI (Formerly LambdaTest), you can run NightWatch tests via CircleCI 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) installed on your system.
-- A TestMu AI (Formerly LambdaTest) account. [Sign up here](https://www.testmuai.com/register/).
-- Your TestMu AI Username and Access Key from your [profile page](https://accounts.lambdatest.com/detail/profile).
+- Node.js installed on your system.
+- A TestMu AI (Formerly LambdaTest) account. Sign up here.
+- Your TestMu AI Username and Access Key from your profile page.
 - A CircleCI account with the LambdaTest ORB enabled.
 
 ### Setup
@@ -56,7 +56,7 @@ Run tests in parallel:
     node_modules\.bin\nightwatch -e chrome,edge,firefox tests
     ```
 
-View results in the [TestMu AI Automation Dashboard](https://automation.lambdatest.com).
+View results in the TestMu AI Automation Dashboard.
 
 #### Run tests via CircleCI ORB
 
