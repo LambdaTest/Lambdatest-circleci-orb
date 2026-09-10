@@ -12,7 +12,7 @@
 With this CircleCI Orb, you can run NightWatch tests via CircleCI across real browsers and operating systems on TestMu AI (Formerly LambdaTest). This sample shows how to configure NightWatch with the CircleCI Orb to run on the TestMu AI cloud.
 
 - [Sign up on TestMu AI](https://www.testmuai.com/register/) (Formerly LambdaTest).
-- Follow the [TestMu AI Documentation](https://www.testmuai.com/support/docs/circleci-integration-with-testmu/) for the full setup walkthrough.
+- Follow the [Integrate CircleCI with TestMu AI](https://www.testmuai.com/support/docs/circleci-integration-with-testmu/) for the full setup walkthrough.
 
 ### Prerequisites
 
