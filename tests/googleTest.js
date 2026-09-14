@@ -8,9 +8,9 @@ module.exports = {
         client
             .url('https://www.google.com/ncr')
             .waitForElementVisible('body', 10000)
-            .setValue('input[type=text]', 'LambdaTest\n')
+            .setValue('input[type=text]', 'TestMu AI\n')
             .pause(1000)
-            .assert.title('LambdaTest - Google Search')
+            .assert.title('TestMu AI - Google Search')
             .end();
     },
 
