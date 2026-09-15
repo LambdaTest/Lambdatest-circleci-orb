@@ -1,10 +1,12 @@
 version: 2.1
 description: |
-      Seamlessly integrate Lambda Tunnel with CircleCI pipelines and 
-      run Selenium tests on 2000+ browsers for your locally hosted or 
-      privately hosted pages with LambdaTest Selenium Grid.
+      Seamlessly integrate the TestMu AI (Formerly LambdaTest) Tunnel with CircleCI
+      pipelines and run Selenium tests on 3000+ browsers for your locally hosted or
+      privately hosted pages on the TestMu AI cloud grid.
+      For more details, check out this TestMu AI CircleCI integration guide:
+      https://www.testmuai.com/support/docs/circleci-integration-with-testmu/
 display:
-  home_url: https://www.lambdatest.com/
+  home_url: https://www.testmuai.com/
   source_url: https://github.com/LambdaTest/Lambdatest-circleci-orb
 
 commands:
@@ -26,14 +28,14 @@ commands:
         Launches the tunnel binary in background
     parameters:
       lambdatest_email:
-        description: Specify your LambdaTest email
+        description: Specify your TestMu AI account email
         type: string
       lambdatest_key:
-         description: Specify environment var holding LambdaTest Access Key
+         description: Specify environment var holding your TestMu AI Access Key
          type: env_var_name
          default: LAMBDATEST_KEY
       tunnel_name:
-        description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
+        description: Specify a tunnel name to uniquely identify your tunnel on the TestMu AI platform
         type: string
       shared_tunnel:
         description: Sharing tunnel among team members
@@ -126,7 +128,7 @@ commands:
       Waits for the tunnel connection to be established with the tunnel server
     steps:
       - run:
-          name: Wait for LambdaTest Tunnel
+          name: Wait for TestMu AI Tunnel
           command: |
             while [ ! -f /tmp/port ]; do sleep 0.5; done
             PORT=$(head -1 /tmp/port)
@@ -137,7 +139,7 @@ commands:
       Quitting the tunnel after test suite has been run
     steps:
       - run:
-          name: Close LambdaTest Tunnel
+          name: Close TestMu AI Tunnel
           command: |
             PORT=$(head -1 /tmp/port)
             status_code=$(curl --request DELETE --write-out %{http_code} --silent --output /dev/null http://127.0.0.1:$PORT/api/v1.0/stop)
@@ -147,20 +149,20 @@ commands:
             rm /tmp/port
 jobs:
   with_tunnel:
-    description: Job to run LambdaTest tunnel for testing locally or privately hosted web apps
+    description: Job to run the TestMu AI tunnel for testing locally or privately hosted web apps
     parameters:
       docker:
         type: string
         default: "cimg/node:current"
       lambdatest_email:
-        description: Specify your LambdaTest email
+        description: Specify your TestMu AI account email
         type: string
       lambdatest_key:
-         description: Specify environment var holding LambdaTest Access Key
+         description: Specify environment var holding your TestMu AI Access Key
          type: env_var_name
          default: LAMBDATEST_KEY
       tunnel_name:
-        description: Specify a tunnel name to uniquely identify your tunnel on LambdaTest platform
+        description: Specify a tunnel name to uniquely identify your tunnel on the TestMu AI platform
         type: string
       shared_tunnel:
         description: Sharing tunnel among team members
@@ -208,7 +210,7 @@ jobs:
         default: false
       steps:
         type: steps
-        description: Steps to execute once the LambdaTest Tunnel is available
+        description: Steps to execute once the TestMu AI Tunnel is available
     docker: 
       - image: <<parameters.docker>>
     steps:
@@ -235,7 +237,7 @@ jobs:
 
 examples:
   sample_test:
-    description: Open lambdatest tunnel and run sample nightwatchjs test
+    description: Open the TestMu AI tunnel and run a sample Nightwatch.js test
     usage:
       version: 2.1
       orbs:
@@ -254,7 +256,7 @@ examples:
                         node_modules/.bin/nightwatch -e chrome
     
   parallel_tests:
-    description: Open lambdatest tunnel and run sample nightwatchjs test in parallel
+    description: Open the TestMu AI tunnel and run sample Nightwatch.js tests in parallel
     usage:
       version: 2.1
       orbs:

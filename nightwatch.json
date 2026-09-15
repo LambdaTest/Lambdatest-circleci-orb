@@ -24,7 +24,7 @@
       "request_timeout_options": {
         "timeout": 1000000
       },
-      "launch_url" : "https://lambdatest.com",
+      "launch_url" : "https://www.testmuai.com",
       "selenium_port"  : 80,
       "selenium_host"  : "hub.lambdatest.com",
       "silent": false,
